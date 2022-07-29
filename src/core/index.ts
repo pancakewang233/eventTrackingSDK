@@ -28,9 +28,20 @@ export default class Tracker {
         })
     }
 
+    public setUserId <T extends DefaultOptions['uuid']>(uuid: T){
+        this.data.uuid = uuid
+    }
+
+    public setExtra <T extends DefaultOptions['extra']>(extra: T){
+        this.data.extra = extra
+    }
+
     private installTracker () {
         if(this.data.historyTracker){
             this.captureEvents(['pushState', 'replaceState', 'popstate'], 'history-pv')
+        }
+        if(this.data.hashTracker){
+            this.captureEvents(['hashchange'], 'hash-pv')
         }
     }
 }
