@@ -1,6 +1,9 @@
 import { DefaultOptions, TrackerConfig, Options } from "../types/index";
 import { createHistoryEvent } from "../utils/pv";
 
+const MouseEventList : string[] = ['click', 'dbclick', 'contextmenu', 
+'mousedown', 'mouseup', 'mouseenter', 'mouseout', 'mouseover']
+
 export default class Tracker {
     public data: Options;
     constructor (options: Options){
@@ -37,6 +40,21 @@ export default class Tracker {
         this.reportTracker(data)
     }
 
+    private targetKeyReport () {
+        MouseEventList.forEach(event => {
+            window.addEventListener(event, (e)=>{
+                const target = e.target as HTMLElement
+                const targetKey = target.getAttribute('target-key')
+                if(targetKey){
+                    this.reportTracker({
+                        event: event,
+                        targetKey
+                    })
+                }
+            })
+        })
+    }
+
     public setUserId <T extends DefaultOptions['uuid']>(uuid: T){
         this.data.uuid = uuid
     }
@@ -51,6 +69,9 @@ export default class Tracker {
         }
         if(this.data.hashTracker){
             this.captureEvents(['hashchange'], 'hash-pv')
+        }
+        if(this.data.domTracker){
+            this.targetKeyReport()
         }
     }
 
