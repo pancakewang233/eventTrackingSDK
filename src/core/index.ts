@@ -24,8 +24,17 @@ export default class Tracker {
         mouseEventList.forEach(event =>{
             window.addEventListener(event, ()=>{
                 console.log('监听到了')
+                this.reportTracker({
+                    event,
+                    targetKey,
+                    data
+                })
             })
         })
+    }
+
+    public sendTracker <T>(data: T) {
+        this.reportTracker(data)
     }
 
     public setUserId <T extends DefaultOptions['uuid']>(uuid: T){
@@ -43,5 +52,15 @@ export default class Tracker {
         if(this.data.hashTracker){
             this.captureEvents(['hashchange'], 'hash-pv')
         }
+    }
+
+    private reportTracker <T>(data: T) {
+        const params = Object.assign(this.data, data, {time: new Date().getTime()})
+
+        let headers = {
+            type: 'application/x-www-form-urlencoded'
+        }
+        let blob = new Blob([JSON.stringify(params)], headers)
+        navigator.sendBeacon(this.data.requestUrl, blob)
     }
 }
