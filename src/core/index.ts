@@ -73,6 +73,9 @@ export default class Tracker {
         if(this.data.domTracker){
             this.targetKeyReport()
         }
+        if(this.data.jsError){
+            this.jsError()
+        }
     }
 
     private reportTracker <T>(data: T) {
@@ -83,5 +86,32 @@ export default class Tracker {
         }
         let blob = new Blob([JSON.stringify(params)], headers)
         navigator.sendBeacon(this.data.requestUrl, blob)
+    }
+
+    private jsError () {
+        this.errorEvent()
+        this.promiseReject()
+    }
+
+    private errorEvent () {
+        window.addEventListener('error', (event)=>{
+            this.reportTracker({
+                event: "error",
+                targetKey: "error-message",
+                message: event.message
+            })
+        })
+    }
+
+    private promiseReject () {
+        window.addEventListener('unhandledrejection', (event)=>{
+            event.promise.catch(error =>{
+                this.reportTracker({
+                    event: "promise",
+                    targetKey: "promise-message",
+                    message: error
+                })
+            })
+        })
     }
 }
